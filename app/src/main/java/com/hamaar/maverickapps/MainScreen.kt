@@ -7,6 +7,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,6 @@ fun MainScreen() {
     Scaffold(
         bottomBar = { BottomNav(navController = navController) }
     ) {
-//        Greeting(name = "Android")
         BottomNavGraph(navController = navController)
     }
 }
@@ -48,40 +48,63 @@ fun BottomNav(navController: NavHostController){
         containerColor = Color.White,
     ) {
         screens.forEach { screen ->
+            val selected = currentDestination?.hierarchy?.any {
+                it.route == screen.route
+            } == true
             AddItem(
                 screen = screen,
                 currentDestination = currentDestination,
-                navController = navController
+                navController = navController,
+                selected = selected
             )
         }
     }
 }
 
 @Composable
+fun NavigationBarItemDefaults.bniColors(
+    selectedIconColor: Color = Color(red = 255, green = 135, blue = 36),
+    selectedTextColor: Color = Color(red = 255, green = 135, blue = 36),
+    unselectedIconColor: Color = Color.Gray,
+    unselectedTextColor: Color = Color.Gray,
+    indicatorColor: Color = Color.White,
+) = colors(
+    selectedIconColor = selectedIconColor,
+    selectedTextColor = selectedTextColor,
+    unselectedIconColor = unselectedIconColor,
+    unselectedTextColor = unselectedTextColor,
+    indicatorColor = indicatorColor
+)
+
+@Composable
 fun RowScope.AddItem(
     screen: BottomNavScreens,
     currentDestination: NavDestination?,
-    navController: NavHostController
+    navController: NavHostController,
+    selected: Boolean
 ) {
     NavigationBarItem(
+        colors = NavigationBarItemDefaults.bniColors(),
         label = {
-            Text(text = screen.title)
+            Text(
+                text = screen.title,
+//                color = Color(red = 255, green = 135, blue = 36)
+            )
         },
         icon = {
             Icon(
-                imageVector = screen.icon,
+                imageVector = if (selected){screen.iconFilled} else {screen.iconOutline},
                 contentDescription = "Navigation Icon",
-                tint = Color(red = 255, green = 135, blue = 36)
+//                tint = Color(red = 255, green = 135, blue = 36)
             )
         },
-        selected = currentDestination?.hierarchy?.any {
-            it.route == screen.route
-        } == true,
+        selected = selected,
         onClick = {
             navController.navigate(screen.route) {
                 popUpTo(navController.graph.findStartDestination().id)
                 launchSingleTop = true
             }
-        }
+        },
+
     )
 }
